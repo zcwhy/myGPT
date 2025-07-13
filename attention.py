@@ -1,5 +1,5 @@
 import torch
-from self_attention_v1 import SelfAttention_v2
+from self_attention_v1 import SelfAttention_v2,CausalAttention,MultiHeadAttentionWrapper,MultiHeadAttention
 
 inputs = torch.tensor(
   [[0.43, 0.15, 0.89], # Your     (x^1)
@@ -86,3 +86,35 @@ torch.manual_seed(123)
 dropout = torch.nn.Dropout(0.5)                                   #A
 example = torch.ones(6, 6)                                        #B
 print(dropout(example))
+
+batch = torch.stack((inputs, inputs), dim=0)
+print(batch.shape)
+
+torch.manual_seed(123)
+context_length = batch.shape[1]
+ca = CausalAttention(d_in, d_out, context_length, 0.0)
+context_vecs = ca(batch)
+print("context_vecs.shape:", context_vecs.shape)
+
+torch.manual_seed(123)
+context_length = batch.shape[1] # This is the number of tokens
+d_in, d_out = 3, 2
+mha = MultiHeadAttentionWrapper(d_in, d_out, context_length, 0.0, num_heads=1)
+context_vecs = mha(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
+
+torch.manual_seed(123)
+batch_size, context_length, d_in = batch.shape
+d_out = 2
+mha = MultiHeadAttention(d_in, d_out, context_length, 0.0, num_heads=2)
+context_vecs = mha(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
+
+torch.manual_seed(123)
+context_length = batch.shape[1]
+ca = CausalAttention(d_in, d_out, context_length, 0.0)
+context_vecs = ca(batch)
+print(context_vecs)
+print("context_vecs.shape:", context_vecs.shape)
